@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-con = sqlite3.connect('db.sqlite', check_same_thread=False)
+con = sqlite3.connect('db.sqlite3', check_same_thread=False)
 cur = con.cursor()
 
 API_TOKEN = os.getenv('API_TOKEN')
