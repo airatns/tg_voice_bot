@@ -61,14 +61,18 @@ def add_user_or_none(message):
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
     """Bot saves the user's voice message to the folder.
-    And relates the message to the user in the database.
+    Converts it to a wav-format with a discrediting frequency of 16kHz. 
+    And relates the voice to the user in the database.
     """
     filename = str(message.voice.file_id)
     filename_full = './voice/' + filename + '.ogg'
+    filename_full_converted = './voice/' + filename + '.wav'
     file_info = bot.get_file(message.voice.file_id)
     downloaded_file = bot.download_file(file_info.file_path)
     with open(filename_full, 'wb') as new_file:
         new_file.write(downloaded_file)
+    os.system(f'ffmpeg -i {filename_full} -ac 1 -ar 16000 {filename_full_converted}')
+    os.remove(filename_full)
     user_id = message.from_user.id
     db_table_voice(voice_id=filename, user_id=user_id)
 
