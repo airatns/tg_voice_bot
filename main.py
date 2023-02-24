@@ -60,9 +60,8 @@ def add_user_or_none(message):
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
-    """Bot saves the user's voice message to the folder.
-    Converts it to a wav-format with a discrediting frequency of 16kHz. 
-    And relates the voice to the user in the database.
+    """Bot converts user's voice message to a wav-format 16kHz.
+    Saves it to the folder. And relates the voice to the user in the database.
     """
     filename = str(message.voice.file_id)
     filename_full = './voice/' + filename + '.ogg'
