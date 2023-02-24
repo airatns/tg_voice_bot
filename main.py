@@ -20,12 +20,12 @@ def db_table_user(user_id: int, user_name: str):
     cur.execute('INSERT INTO users (user_id, user_name) VALUES (?, ?);', (user_id, user_name))
     con.commit()
 
-def db_table_voice(voice_id: str, user_id: int):
+def db_table_voice(voice_id: str, description: str, user_id: int):
     """Creates a Voice table (related with the User table) in the database
     and fills it with values.
     """
-    cur.execute('CREATE TABLE IF NOT EXISTS voices(voice_id TEXT NOT NULL, user_id INTEGER NOT NULL, FOREIGN KEY(user_id) REFERENCES users(user_id))')
-    cur.execute('INSERT INTO voices (voice_id, user_id) VALUES (?, ?);', (voice_id, user_id))
+    cur.execute('CREATE TABLE IF NOT EXISTS voices(voice_id TEXT NOT NULL, description TEXT NOT NULL, user_id INTEGER NOT NULL, FOREIGN KEY(user_id) REFERENCES users(user_id))')
+    cur.execute('INSERT INTO voices (voice_id, description, user_id) VALUES (?, ?, ?);', (voice_id, description, user_id))
     con.commit()
 
 @bot.message_handler(commands=['start'], content_types=['text'])
@@ -36,7 +36,7 @@ def start_message(message):
     """
     us_id = message.from_user.id
     try:
-        us_name = cur.execute('SELECT user_name FROM users WHERE user_id = ?;', (us_id,)).fetchone()
+        us_name = cur.execute('SELECT user_name FROM users WHERE user_id = ? AND user_name NULL;', (us_id,)).fetchone()
     except:
         bot.send_message(message.chat.id, 'Welcome!\nWhat is your name')
         bot.register_next_step_handler(message, add_user_or_none)
@@ -72,8 +72,18 @@ def voice_processing(message):
         new_file.write(downloaded_file)
     os.system(f'ffmpeg -i {filename_full} -ac 1 -ar 16000 {filename_full_converted}')
     os.remove(filename_full)
-    user_id = message.from_user.id
-    db_table_voice(voice_id=filename, user_id=user_id)
+
+    # try:
+    #     position = cur.execute('SELECT COUNT(description) FROM voices WHERE voice_id = ?;', (filename,))
+    # except:
+    #     position = 1
+    # else:
+    #     if position == 0:
+    #         position += 1
+    # finally:
+    #     user_id = message.from_user.id
+    #     description = f'audio_message_{position}'
+    #     db_table_voice(voice_id=filename, description=description, user_id=user_id)
 
 
 bot.polling(none_stop=True, interval=0)
