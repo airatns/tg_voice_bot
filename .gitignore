@@ -59,6 +59,7 @@ coverage.xml
 *.log
 local_settings.py
 db.sqlite3
+db.sqlite
 db.sqlite3-journal
 
 # Flask stuff:
@@ -129,8 +130,3 @@ dmypy.json
 .pyre/
 
 voice/*.ogg
-
-db.sqlite3
-db.sqlite
-*.sqlite
-*.sqlite3
