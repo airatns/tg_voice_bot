@@ -62,7 +62,7 @@ def add_user_or_none(message):
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
     """Bot converts user's voice message to a wav-format 16kHz.
-    Saves it to the folder. And relates the voice to the user in the database.
+    And saves it to the folder.
     """
     filename = str(message.voice.file_id)
     filename_full = './voice/' + filename + '.ogg'
@@ -73,20 +73,21 @@ def voice_processing(message):
         new_file.write(downloaded_file)
     os.system(f'ffmpeg -i {filename_full} -ac 1 -ar 16000 {filename_full_converted}')
     os.remove(filename_full)
-#     add_voice_to_user(message, filename)
+    add_voice_to_user(message, filename)
 
-# def add_voice_to_user(message, filename):
-#     us_id = message.from_user.id
-#     try:
-#         position = cur.execute('SELECT COUNT(description) FROM voices WHERE user_id = ? AND user_id is NOT NULL;', (us_id,))
-#     except:
-#         position = 1
-#     # else:
-#     #     if position == 0:
-#     #         position += 1
-#     finally:
-#         description = f'audio_message_{position}'
-#         db_table_voice(voice_id=filename, description=description, user_id=us_id)
+def add_voice_to_user(message, filename):
+    """Bot relates the voice to the user in the database.
+    """
+    us_id = message.from_user.id
+    try:
+        quantity = cur.execute('SELECT COUNT (*) FROM voices WHERE user_id = ?;', (us_id,)).fetchall()
+    except:
+        position = 1
+    else:
+        quantity = re.sub('[^A-Za-z0-9]+', '', str(quantity))
+        position = int(quantity) + 1
+    description = f'audio_message_{position}'
+    db_table_voice(voice_id=filename, description=description, user_id=us_id)
 
 
 bot.polling(none_stop=True, interval=0)
