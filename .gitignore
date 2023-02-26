@@ -131,3 +131,7 @@ dmypy.json
 
 voice/*.ogg
 voice/*.wav
+
+image/*.jpg
+image/*.jpeg
+image/*.png

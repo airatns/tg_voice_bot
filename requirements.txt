@@ -3,6 +3,9 @@ cffi==1.15.1
 charset-normalizer==3.0.1
 future==0.18.3
 idna==3.4
+numpy==1.24.2
+opencv-python==4.7.0.72
+Pillow==9.4.0
 pycparser==2.21
 pyTelegramBotAPI==4.10.0
 python-dotenv==0.21.1

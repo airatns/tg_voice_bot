@@ -1,8 +1,14 @@
+import io
+import cv2
+import numpy
 import os
 import re
 import sqlite3
 import telebot
+import tempfile
 from dotenv import load_dotenv
+from PIL import Image
+
 
 load_dotenv()
 
@@ -61,7 +67,10 @@ def add_user_or_none(message):
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
-    """Bot converts user's voice message to a wav-format 16kHz.
+    """!!!!!!!!!!!!!! ПОПРОБОВАТЬ БЕЗ СОХРАНЕНИЯ
+    !!!!!!!!!!!!!!! file_info вставить file_name
+    !!!!!!!!!!!!!!!! может без str
+    Bot converts user's voice message to a wav-format 16kHz.
     And saves it to the folder.
     """
     filename = str(message.voice.file_id)
@@ -90,4 +99,27 @@ def add_voice_to_user(message, filename):
     db_table_voice(voice_id=filename, description=description, user_id=us_id)
 
 
+@bot.message_handler(content_types=['photo'])
+def photo_processing(message):
+    haarcascade_path = os.path.dirname(cv2.__file__) + '\data\haarcascade_frontalface_default.xml'
+    face_recog = cv2.CascadeClassifier(haarcascade_path)
+
+    photo_id = message.photo[-1].file_id
+    filename_full = f'./image/{photo_id}.jpg'
+    file_info = bot.get_file(photo_id)  # # <class 'telebot.types.File'>
+    downloaded_file = bot.download_file(file_info.file_path)    # <class 'bytes'> 'file_path': 'photos/file_84.jpg'
+
+    nparray = numpy.frombuffer(downloaded_file, numpy.uint8)
+    img_np = cv2.imdecode(nparray, cv2.IMREAD_COLOR)
+
+    face_result = face_recog.detectMultiScale(img_np, scaleFactor=2, minNeighbors=3)
+    
+    if len(face_result) > 0:
+        with open(filename_full, 'wb') as new_file:
+            new_file.write(downloaded_file)
+
+    
 bot.polling(none_stop=True, interval=0)
+
+    # im1 = Image.open(image)
+    # im1.show()
