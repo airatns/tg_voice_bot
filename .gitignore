@@ -129,9 +129,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-*.ogg
-*.wav
+voice/*.ogg
+voice/*.wav
 
-*.jpg
-*.jpeg
-*.png
+image/*.jpg
+image/*.jpeg
+image/*.png
