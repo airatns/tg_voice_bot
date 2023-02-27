@@ -1,13 +1,10 @@
-import io
 import cv2
 import numpy
 import os
 import re
 import sqlite3
 import telebot
-import tempfile
 from dotenv import load_dotenv
-from PIL import Image
 
 
 load_dotenv()
@@ -67,8 +64,7 @@ def add_user_or_none(message):
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
-    """!!!!!!!!!!!!!! ПОПРОБОВАТЬ БЕЗ СОХРАНЕНИЯ
-    The Bot converts user's voice message to a wav-format 16kHz.
+    """The Bot converts user's voice message to a wav-format 16kHz.
     And saves it to the folder.
     """
     filename = message.voice.file_id
