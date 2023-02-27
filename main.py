@@ -1,11 +1,11 @@
-import cv2
-import numpy
 import os
 import re
 import sqlite3
+
+import cv2
+import numpy
 import telebot
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
@@ -16,12 +16,14 @@ API_TOKEN = os.getenv('API_TOKEN')
 
 bot = telebot.TeleBot(API_TOKEN)
 
+
 def db_table_user(user_id: int, user_name: str):
     """Creates a User table in the database and fills it with values.
     """
     cur.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, user_name TEXT)')
     cur.execute('INSERT INTO users (user_id, user_name) VALUES (?, ?);', (user_id, user_name))
     con.commit()
+
 
 def db_table_voice(voice_id: str, description: str, user_id: int):
     """Creates a Voice table (related with the User table) in the database
@@ -30,6 +32,7 @@ def db_table_voice(voice_id: str, description: str, user_id: int):
     cur.execute('CREATE TABLE IF NOT EXISTS voices(voice_id TEXT NOT NULL, description TEXT NOT NULL, user_id INTEGER NOT NULL, FOREIGN KEY(user_id) REFERENCES users(user_id))')
     cur.execute('INSERT INTO voices (voice_id, description, user_id) VALUES (?, ?, ?);', (voice_id, description, user_id))
     con.commit()
+
 
 @bot.message_handler(commands=['start'], content_types=['text'])
 def start_message(message):
@@ -43,12 +46,12 @@ def start_message(message):
         bool(len(us_name))
     except:
         bot.send_message(message.chat.id, 'Welcome!\nWhat is your name')
-        bot.register_next_step_handler(message, add_user_or_none)
+        bot.register_next_step_handler(message, add_new_user)
     else:
         us_name = re.sub('[^A-Za-z0-9]+', '', str(us_name))
         bot.send_message(message.chat.id, f'Welcome, {us_name}')
 
-def add_user_or_none(message):
+def add_new_user(message):
     """The Bot gets user's name and writes user's data into the database.
     Then greets him.
     """
@@ -56,7 +59,7 @@ def add_user_or_none(message):
     us_name = message.text
     if us_name is None:
         bot.send_message(message.chat.id, 'Please, introduce yourself')
-        bot.register_next_step_handler(message, add_user_or_none)
+        bot.register_next_step_handler(message, add_new_user)
         return
     db_table_user(user_id=us_id, user_name=us_name)
     bot.send_message(message.from_user.id, f'Hi, {us_name}')
@@ -77,6 +80,7 @@ def voice_processing(message):
     os.system(f'ffmpeg -i {filename_full} -ac 1 -ar 16000 {filename_full_converted}')
     os.remove(filename_full)
     add_voice_to_user(message, filename)
+
 
 def add_voice_to_user(message, filename):
     """The Bot relates the voice to the user in the database.
