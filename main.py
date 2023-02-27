@@ -36,8 +36,8 @@ def db_table_voice(voice_id: str, description: str, user_id: int):
 
 @bot.message_handler(commands=['start'], content_types=['text'])
 def start_message(message):
-    """If the user is already in the database, the bot greets him.
-    If the user is absent, the bot asks for his name, and then
+    """If the user is already in the database, the Bot greets him.
+    If the user is absent, the Bot asks for his name, and then
     initializes an entry into the database.
     """
     us_id = message.from_user.id
@@ -52,7 +52,7 @@ def start_message(message):
         bot.send_message(message.chat.id, f'Welcome, {us_name}')
 
 def add_user_or_none(message):
-    """Bot gets user's name and writes user's data into the database.
+    """The Bot gets user's name and writes user's data into the database.
     Then greets him.
     """
     us_id = message.from_user.id
@@ -70,10 +70,10 @@ def voice_processing(message):
     """!!!!!!!!!!!!!! ПОПРОБОВАТЬ БЕЗ СОХРАНЕНИЯ
     !!!!!!!!!!!!!!! file_info вставить file_name
     !!!!!!!!!!!!!!!! может без str
-    Bot converts user's voice message to a wav-format 16kHz.
+    The Bot converts user's voice message to a wav-format 16kHz.
     And saves it to the folder.
     """
-    filename = str(message.voice.file_id)
+    filename = message.voice.file_id
     filename_full = './voice/' + filename + '.ogg'
     filename_full_converted = './voice/' + filename + '.wav'
     file_info = bot.get_file(message.voice.file_id)
@@ -85,7 +85,7 @@ def voice_processing(message):
     add_voice_to_user(message, filename)
 
 def add_voice_to_user(message, filename):
-    """Bot relates the voice to the user in the database.
+    """The Bot relates the voice to the user in the database.
     """
     us_id = message.from_user.id
     try:
@@ -101,23 +101,28 @@ def add_voice_to_user(message, filename):
 
 @bot.message_handler(content_types=['photo'])
 def photo_processing(message):
-    haarcascade_path = os.path.dirname(cv2.__file__) + '\data\haarcascade_frontalface_default.xml'
-    face_recog = cv2.CascadeClassifier(haarcascade_path)
-
+    """The Bot gets an image and detects, if there is a face in the photo.
+    If there is a face, the Bot saves the photo.
+    """
     photo_id = message.photo[-1].file_id
     filename_full = f'./image/{photo_id}.jpg'
-    file_info = bot.get_file(photo_id)  # # <class 'telebot.types.File'>
-    downloaded_file = bot.download_file(file_info.file_path)    # <class 'bytes'> 'file_path': 'photos/file_84.jpg'
+    file_info = bot.get_file(photo_id)
+    downloaded_file = bot.download_file(file_info.file_path)
 
+    haarcascade_path = os.path.dirname(cv2.__file__) + '\data\haarcascade_frontalface_default.xml'
+    face_recog = cv2.CascadeClassifier(haarcascade_path)
     nparray = numpy.frombuffer(downloaded_file, numpy.uint8)
     img_np = cv2.imdecode(nparray, cv2.IMREAD_COLOR)
-
     face_result = face_recog.detectMultiScale(img_np, scaleFactor=2, minNeighbors=3)
     
     if len(face_result) > 0:
         with open(filename_full, 'wb') as new_file:
             new_file.write(downloaded_file)
-
+        text = 'Yesss, this is a photo with a face'
+    else:
+        text = 'Oh, there is no face in this photo. But you can send another one'
+    bot.send_message(message.chat.id, text)
+    
     
 bot.polling(none_stop=True, interval=0)
 
