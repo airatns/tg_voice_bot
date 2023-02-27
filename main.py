@@ -26,10 +26,7 @@ def db_table_user(user_id: int, user_name: str):
         );
     """
     )
-    cur.execute(
-        "INSERT INTO users VALUES (?, ?);",
-        (user_id, user_name)
-    )
+    cur.execute("INSERT INTO users VALUES (?, ?);", (user_id, user_name))
     con.commit()
 
 
@@ -66,7 +63,7 @@ def start_message(message):
             "SELECT user_name FROM users WHERE user_id = ?;", (us_id,)
         ).fetchone()
         bool(len(us_name))
-    except:
+    except Exception:
         bot.send_message(message.chat.id, "Welcome!\nWhat is your name")
         bot.register_next_step_handler(message, add_new_user)
     else:
@@ -95,12 +92,14 @@ def voice_processing(message):
     """
     filename = message.voice.file_id
     filename_full = "./voice/" + filename + ".ogg"
-    filename_full_converted = "./voice/" + filename + ".wav"
+    filename_converted = "./voice/" + filename + ".wav"
     file_info = bot.get_file(filename)
     downloaded_file = bot.download_file(file_info.file_path)
     with open(filename_full, "wb") as new_file:
         new_file.write(downloaded_file)
-    os.system(f"ffmpeg -i {filename_full} -ac 1 -ar 16000 {filename_full_converted}")
+    os.system(
+        f"ffmpeg -i {filename_full} -ac 1 -ar 16000 " f"{filename_converted}"
+    )
     os.remove(filename_full)
     add_voice_to_user(message, filename)
 
@@ -112,7 +111,7 @@ def add_voice_to_user(message, filename):
         quantity = cur.execute(
             "SELECT COUNT (*) FROM voices WHERE user_id = ?;", (us_id,)
         ).fetchall()
-    except:
+    except Exception:
         position = 1
     else:
         quantity = re.sub("[^A-Za-z0-9]+", "", str(quantity))
@@ -131,20 +130,24 @@ def photo_processing(message):
     file_info = bot.get_file(photo_id)
     downloaded_file = bot.download_file(file_info.file_path)
 
-    haarcascade_path = (
-        os.path.dirname(cv2.__file__) + "\data\haarcascade_frontalface_default.xml"
-    )
+    haarcascade_xml = r"\data\haarcascade_frontalface_default.xml"
+    haarcascade_path = os.path.dirname(cv2.__file__) + haarcascade_xml
     face_recog = cv2.CascadeClassifier(haarcascade_path)
     nparray = numpy.frombuffer(downloaded_file, numpy.uint8)
     img_np = cv2.imdecode(nparray, cv2.IMREAD_COLOR)
-    face_result = face_recog.detectMultiScale(img_np, scaleFactor=2, minNeighbors=3)
+    face_result = face_recog.detectMultiScale(
+        img_np,
+        scaleFactor=2,
+        minNeighbors=3
+    )
 
     if len(face_result) > 0:
         with open(filename_full, "wb") as new_file:
             new_file.write(downloaded_file)
         text = "Yesss, this is a photo with a face"
     else:
-        text = "Oh, there is no face in this photo. But you can send another one"
+        text = ("Oh, there is no face in this photo. "
+                "But you can send another one")
     bot.send_message(message.chat.id, text)
 
 
