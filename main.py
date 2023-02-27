@@ -68,15 +68,13 @@ def add_user_or_none(message):
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
     """!!!!!!!!!!!!!! ПОПРОБОВАТЬ БЕЗ СОХРАНЕНИЯ
-    !!!!!!!!!!!!!!! file_info вставить file_name
-    !!!!!!!!!!!!!!!! может без str
     The Bot converts user's voice message to a wav-format 16kHz.
     And saves it to the folder.
     """
     filename = message.voice.file_id
     filename_full = './voice/' + filename + '.ogg'
     filename_full_converted = './voice/' + filename + '.wav'
-    file_info = bot.get_file(message.voice.file_id)
+    file_info = bot.get_file(filename)
     downloaded_file = bot.download_file(file_info.file_path)
     with open(filename_full, 'wb') as new_file:
         new_file.write(downloaded_file)
