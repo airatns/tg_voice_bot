@@ -35,6 +35,10 @@ Install dependencies in the app using requirements.txt:
 >*python -m pip install --upgrade pip* \
 >*pip install -r requirements.txt*
 
+Create an .env file and fill it with the next data:
+
+>*API_TOKEN*
+
 Run the app locally:
 
 >*python main.py*
