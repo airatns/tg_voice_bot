@@ -134,10 +134,10 @@ def photo_processing(message):
     haarcascade_path = os.path.dirname(cv2.__file__) + haarcascade_xml
     face_recog = cv2.CascadeClassifier(haarcascade_path)
     nparray = numpy.frombuffer(downloaded_file, numpy.uint8)
-    img_np = cv2.imdecode(nparray, cv2.IMREAD_COLOR)
+    img_np = cv2.imdecode(nparray, cv2.IMREAD_GRAYSCALE)
     face_result = face_recog.detectMultiScale(
         img_np,
-        scaleFactor=2,
+        scaleFactor=1.1,
         minNeighbors=3
     )
 
